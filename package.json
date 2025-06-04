@@ -1,0 +1,37 @@
+{
+  "name": "nouiapptest",
+  "version": "1.0.0",
+  "description": "A simple CAP project.",
+  "repository": "<Add your repository here>",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@cap-js/hana": "^1",
+    "@sap-cloud-sdk/core": "^1.54.2",
+    "@sap-cloud-sdk/http-client": "^4.0.2",
+    "@sap/cds": "^8",
+    "@sap/hana-client": "^2.24.26",
+    "@sap/xssec": "^4",
+    "axios": "^1.9.0",
+    "express": "^4"
+  },
+  "devDependencies": {
+    "@cap-js/cds-types": "^0.10.0",
+    "@cap-js/sqlite": "^1",
+    "@sap/cds-dk": "^8"
+  },
+  "scripts": {
+    "start": "cds-serve"
+  },
+  "cds": {
+    "sql": {
+      "native_hana_associations": false
+    },
+    "requires": {
+      "auth": "mocked",
+      "[production]": {
+        "auth": "xsuaa"
+      }
+    }
+  }
+}

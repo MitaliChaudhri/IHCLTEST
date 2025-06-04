@@ -1,0 +1,96 @@
+_schema-version: 3.3.0
+ID: nouiapptest
+description: A simple CAP project.
+version: 1.0.0
+modules:
+  - name: nouiapptest-srv
+    type: nodejs
+    path: gen/srv
+    requires:
+      - name: nouiapptest-db
+      - name: uaa_nouiapptest
+    provides:
+      - name: srv-api
+        properties:
+          srv-url: ${default-url}
+    parameters:
+      buildpack: nodejs_buildpack
+      instances: 1
+    build-parameters:
+      builder: npm-ci
+  - name: nouiapptest-db-deployer
+    type: hdb
+    path: gen/db
+    requires:
+      - name: nouiapptest-db
+    parameters:
+      buildpack: nodejs_buildpack
+  - name: nouiapptest-destination-content
+    type: com.sap.application.content
+    requires:
+      - name: nouiapptest-destination-service
+        parameters:
+          content-target: true
+      - name: nouiapptest_html_repo_host
+        parameters:
+          service-key:
+            name: nouiapptest_html_repo_host-key
+      - name: uaa_nouiapptest
+        parameters:
+          service-key:
+            name: uaa_nouiapptest-key
+    parameters:
+      content:
+        instance:
+          destinations:
+            - Name: nouiapprouter_nouiapptest_html_repo_host
+              ServiceInstanceName: nouiapptest-html5-app-host-service
+              ServiceKeyName: nouiapptest_html_repo_host-key
+              sap.cloud.service: nouiapprouter
+            - Authentication: OAuth2UserTokenExchange
+              Name: nouiapprouter_uaa_nouiapptest
+              ServiceInstanceName: nouiapptest-xsuaa-service
+              ServiceKeyName: uaa_nouiapptest-key
+              sap.cloud.service: nouiapprouter
+          existing_destinations_policy: ignore
+    build-parameters:
+      no-source: true
+resources:
+  - name: nouiapptest-db
+    type: com.sap.xs.hdi-container
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+  - name: nouiapptest-destination-service
+    type: org.cloudfoundry.managed-service
+    parameters:
+      config:
+        HTML5Runtime_enabled: true
+        version: 1.0.0
+      service: destination
+      service-name: nouiapptest-destination-service
+      service-plan: lite
+  - name: nouiapptest_html_repo_host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-name: nouiapptest-html5-app-host-service
+      service-plan: app-host
+  - name: uaa_nouiapptest
+    type: org.cloudfoundry.managed-service
+    parameters:
+      path: ./xs-security.json
+      service: xsuaa
+      service-name: nouiapptest-xsuaa-service
+      service-plan: application
+      config:
+        xsappname: nouiapptest
+        tenant-mode: dedicated
+parameters:
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm ci
+        - npx cds build --production
