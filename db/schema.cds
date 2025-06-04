@@ -35,6 +35,6 @@ entity T_LastYearContractRate : cuid, managed {
         WeightedContractedValue : Decimal(15, 2);
         AnnualAvgRate           : Decimal(15, 2);
         WeightedAvgValue        : Decimal(15, 2);
-        LastYear                : String(10);
+        LastYear                : String(100);
 }
 
